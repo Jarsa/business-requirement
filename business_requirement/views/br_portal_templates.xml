@@ -29,8 +29,13 @@
     >
         <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
             <t t-call="portal.portal_docs_entry">
+                <t
+                    t-set="icon"
+                    t-value="'/business_requirement/static/src/img/business_requirements.svg'"
+                />
                 <t t-set="title">Business Requirements</t>
                 <t t-set="url" t-value="'/my/business_requirements'" />
+                <t t-set="text">Follow the status of your business requirements</t>
                 <t t-set="placeholder_count" t-value="'business_requirement_count'" />
             </t>
         </xpath>
