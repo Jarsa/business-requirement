@@ -4,10 +4,7 @@ from odoo import http
 from odoo.exceptions import AccessError
 from odoo.http import request
 
-from odoo.addons.portal.controllers.portal import (
-    CustomerPortal,
-    get_records_pager,
-)
+from odoo.addons.portal.controllers.portal import CustomerPortal
 from odoo.addons.portal.controllers.portal import (
     pager as portal_pager,
 )
@@ -34,23 +31,14 @@ class CustomerPortal(CustomerPortal):
         ]
 
     def _br_get_page_view_values(self, br, access_token, **kwargs):
-        values = {"business_requirement": br, "page_name": "business_requirement"}
-        if access_token:
-            values["no_breadcrumbs"] = True
-            values["access_token"] = access_token
-        values["portal_confirmation"] = br.get_portal_confirmation_action()
-
-        if kwargs.get("error"):
-            values["error"] = kwargs["error"]
-        if kwargs.get("warning"):
-            values["warning"] = kwargs["warning"]
-        if kwargs.get("success"):
-            values["success"] = kwargs["success"]
-
-        history = request.session.get("my_br_history", [])
-        values.update(get_records_pager(history, br))
-
-        return values
+        values = {
+            "business_requirement": br,
+            "page_name": "business_requirement",
+            "portal_confirmation": br.get_portal_confirmation_action(),
+        }
+        return self._get_page_view_values(
+            br, access_token, values, "my_br_history", False, **kwargs
+        )
 
     @http.route(
         ["/my/business_requirements", "/my/business_requirements/page/<int:page>"],
