@@ -126,7 +126,7 @@ class CustomerPortal(CustomerPortal):
         return request.render("business_requirement.portal_br_page", values)
 
     def _get_br_report_name(self):
-        return "business_requirement." "business_requirement_report"
+        return "business_requirement.business_requirement_report"
 
     @http.route(
         ["/my/business_requirement/pdf/<int:br_id>"],
