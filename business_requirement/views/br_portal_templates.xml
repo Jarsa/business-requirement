@@ -184,7 +184,9 @@
             </div>
             <hr />
             <div id="br_chat" data-anchor="true">
-                <h3>Message and communication history</h3>
+                <!-- mb-4 keeps the chatter's sticky top bar (-15px margin inside
+                     its shadow DOM) from overlapping the heading -->
+                <h3 class="mb-4">Message and communication history</h3>
                 <t t-call="portal.message_thread">
                     <t t-set="object" t-value="br" />
                     <t t-set="token" t-value="br.access_token" />
