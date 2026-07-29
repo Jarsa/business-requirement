@@ -4,7 +4,7 @@
     "name": "Business Requirement Project Tasks",
     "category": "Business Requirements Management",
     "summary": "Link business requirements to project tasks",
-    "version": "17.0.1.0.0",
+    "version": "19.0.1.0.0",
     "website": "https://github.com/OCA/business-requirement",
     "author": "Jarsa Sistemas, Odoo Community Association (OCA)",
     "depends": ["business_requirement", "project"],

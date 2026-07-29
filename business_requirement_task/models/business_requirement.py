@@ -1,7 +1,7 @@
 # Copyright 2026 Jarsa Sistemas
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 
 from odoo.addons.project.models.project_task import CLOSED_STATES
 
@@ -59,9 +59,9 @@ class BusinessRequirement(models.Model):
         self.ensure_one()
         return {
             "type": "ir.actions.act_window",
-            "name": _("Tasks"),
+            "name": self.env._("Tasks"),
             "res_model": "project.task",
-            "view_mode": "tree,kanban,form",
+            "view_mode": "list,kanban,form",
             "domain": [("business_requirement_id", "=", self.id)],
             "context": {
                 "default_business_requirement_id": self.id,
@@ -73,7 +73,7 @@ class BusinessRequirement(models.Model):
         self.ensure_one()
         return {
             "type": "ir.actions.act_window",
-            "name": _("Create Task"),
+            "name": self.env._("Create Task"),
             "res_model": "project.task",
             "view_mode": "form",
             "context": {
