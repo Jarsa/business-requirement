@@ -78,9 +78,11 @@ class TestBusinessRequirementTask(common.TransactionCase):
         self.assertEqual(task.project_id, self.other_project)
 
     def test_ondelete_restrict(self):
-        with self.assertRaises(psycopg2.IntegrityError), mute_logger(
-            "odoo.sql_db"
-        ), self.env.cr.savepoint():
+        with (
+            self.assertRaises(psycopg2.IntegrityError),
+            mute_logger("odoo.sql_db"),
+            self.env.cr.savepoint(),
+        ):
             self.br.unlink()
 
     def test_action_view_tasks(self):
