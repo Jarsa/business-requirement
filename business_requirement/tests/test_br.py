@@ -1,6 +1,5 @@
 # Copyright 2017-2019 Elico Corp (https://www.elico-corp.com).
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-from odoo import _
 from odoo.tests import common
 
 
@@ -20,7 +19,7 @@ class BusinessRequirementTest(BusinessRequirementTestBase):
         self.message = self.br.with_context(
             **{"default_model": "business.requirement", "default_res_id": self.br.id}
         ).message_post(
-            body=_("Test Body"),
+            body="Test Body",
             message_type="notification",
             subtype_id=self.env.ref("mail.mt_note").id,
             **{},

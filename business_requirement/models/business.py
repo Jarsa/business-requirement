@@ -2,7 +2,7 @@
 # Copyright 2019 Tecnativa - Alexandre Díaz
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -11,6 +11,7 @@ class BusinessRequirement(models.Model):
     _name = "business.requirement"
     _description = "Business Requirement"
     _order = "name desc"
+    _rec_names_search = ["name", "description"]
 
     sequence = fields.Char(readonly=True, copy=False, index=True)
     name = fields.Char(readonly=True, copy=False)
@@ -38,6 +39,7 @@ class BusinessRequirement(models.Model):
         default="draft",
         copy=False,
         tracking=True,
+        group_expand=True,
     )
     change_request = fields.Boolean(string="Change Request?")
     partner_id = fields.Many2one(
@@ -137,7 +139,7 @@ class BusinessRequirement(models.Model):
                     vals.update({"approved_id": user.id, "approval_date": date})
                 else:
                     raise ValidationError(
-                        _(
+                        self.env._(
                             "You can only move to the following stage: "
                             "draft/confirmed /cancel/drop."
                         )
@@ -145,7 +147,7 @@ class BusinessRequirement(models.Model):
             if vals["state"] in {"approved", "in_progress", "done"}:
                 if not user_manager:
                     raise ValidationError(
-                        _(
+                        self.env._(
                             "You can only move to the following stage: "
                             "draft/confirmed/cancel/drop."
                         )
@@ -158,19 +160,6 @@ class BusinessRequirement(models.Model):
         for br in self:
             br.display_name = f"[{br.name}] {br.description}"
 
-    @api.model
-    def _name_search(self, name, domain=None, operator="ilike", limit=None, order=None):
-        """Search BR based on Name or Description"""
-        domain = domain or []
-        if name:
-            domain = [
-                "|",
-                ("name", operator, name),
-                ("description", "=ilike", name + "%"),
-            ] + domain
-        return self._search(domain, limit=limit, order=order)
-
-    @api.returns("mail.message", lambda value: value.id)
     def message_post(self, *, subject=None, **kwargs):
         context = self.env.context
         if context.get("default_model") == "business.requirement" and context.get(
@@ -184,56 +173,6 @@ class BusinessRequirement(models.Model):
             BusinessRequirement, self.with_context(mail_create_nosubscribe=True)
         ).message_post(subject=subject, **kwargs)
 
-    @api.model
-    def read_group(
-        self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True
-    ):
-        """Read group customization in order to display all the stages in the
-        kanban view. if the stages values are there it will group by state.
-        """
-        if groupby and groupby[0] == "state":
-            states = (
-                self.env["business.requirement"]
-                .fields_get(["state"])
-                .get("state")
-                .get("selection")
-            )
-            read_group_all_states = [
-                {
-                    "__context": {"group_by": groupby[1:]},
-                    "__domain": domain + [("state", "=", state_value)],
-                    "state": state_value,
-                    "state_count": 0,
-                }
-                for state_value, state_name in states
-            ]
-            # Get standard results
-            read_group_res = super().read_group(
-                domain, fields, groupby, offset=offset, limit=limit, orderby=orderby
-            )
-            # Update standard results with default results
-            result = []
-            for state_value, _state_name in states:
-                res = list(filter(lambda x: x["state"] == state_value, read_group_res))
-                if not res:
-                    res = list(
-                        filter(
-                            lambda x: x["state"] == state_value, read_group_all_states
-                        )
-                    )
-                res[0]["state"] = state_value
-                result.append(res[0])
-            return result
-        return super().read_group(
-            domain,
-            fields,
-            groupby,
-            offset=offset,
-            limit=limit,
-            orderby=orderby,
-            lazy=lazy,
-        )
-
     def get_portal_confirmation_action(self):
         return (
             self.env["ir.config_parameter"]
@@ -246,7 +185,7 @@ class BusinessRequirement(models.Model):
     def _compute_access_url(self):
         super()._compute_access_url()
         for br in self:
-            br.access_url = "/my/business_requirement/%s" % br.id
+            br.access_url = f"/my/business_requirement/{br.id}"
         return
 
     def portal_publish_button(self):
