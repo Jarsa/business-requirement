@@ -1,5 +1,6 @@
 # Copyright 2017-2019 Elico Corp (https://www.elico-corp.com).
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+from odoo.exceptions import UserError
 from odoo.tests import common
 
 
@@ -61,3 +62,34 @@ class BusinessRequirementTest(BusinessRequirementTestBase):
             "business_requirement.br_report", self.br.ids
         )
         self.assertRegex(str(res[0]), self.br.name)
+
+
+class BusinessRequirementCategoryTest(common.TransactionCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.Category = cls.env["business.requirement.category"]
+        cls.parent = cls.Category.create({"name": "Purchase"})
+        cls.child = cls.Category.create(
+            {"name": "Goods Reception", "parent_id": cls.parent.id}
+        )
+
+    def test_complete_name(self):
+        self.assertEqual(self.child.complete_name, "Purchase / Goods Reception")
+        self.assertEqual(self.child.display_name, "Purchase / Goods Reception")
+
+    def test_complete_name_recomputed_on_rename(self):
+        self.parent.name = "Procurement"
+        self.assertEqual(self.child.complete_name, "Procurement / Goods Reception")
+
+    def test_child_ids(self):
+        self.assertEqual(self.parent.child_ids, self.child)
+
+    def test_child_of_search(self):
+        found = self.Category.search([("id", "child_of", self.parent.id)])
+        self.assertIn(self.child, found)
+
+    def test_recursion_is_rejected(self):
+        # _parent_store raises this on its own; no custom constraint needed.
+        with self.assertRaises(UserError):
+            self.parent.parent_id = self.child
