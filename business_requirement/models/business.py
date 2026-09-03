@@ -86,7 +86,9 @@ class BusinessRequirement(models.Model):
     kanban_state = fields.Selection(
         selection=[
             ("normal", "In Progress"),
-            ("on_hold", "On Hold"),
+            # `blocked` is the key Odoo's state widget paints red; renaming it
+            # is what makes the field look like every other kanban state.
+            ("blocked", "On Hold"),
             ("done", "Ready for next stage"),
         ],
         tracking=True,

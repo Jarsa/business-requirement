@@ -40,7 +40,7 @@
                         <field
                             name="kanban_state"
                             class="oe_inline"
-                            widget="kanban_state_selection"
+                            widget="state_selection"
                         />
                     </div>
                     <h1>

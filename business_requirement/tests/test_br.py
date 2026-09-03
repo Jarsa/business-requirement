@@ -93,3 +93,18 @@ class BusinessRequirementCategoryTest(common.TransactionCase):
         # _parent_store raises this on its own; no custom constraint needed.
         with self.assertRaises(UserError):
             self.parent.parent_id = self.child
+
+
+class BusinessRequirementKanbanStateTest(common.TransactionCase):
+    def test_kanban_state_uses_the_key_the_widget_paints(self):
+        """`state_selection` only colours `blocked` red and `done` green."""
+        selection = dict(
+            self.env["business.requirement"]._fields["kanban_state"].selection
+        )
+        self.assertIn("blocked", selection)
+        self.assertNotIn("on_hold", selection)
+
+    def test_form_uses_a_widget_that_exists_in_19(self):
+        arch = self.env.ref("business_requirement.view_business_requirement_form").arch
+        self.assertIn('widget="state_selection"', arch)
+        self.assertNotIn("kanban_state_selection", arch)
