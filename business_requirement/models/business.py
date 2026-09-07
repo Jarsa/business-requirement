@@ -104,7 +104,9 @@ class BusinessRequirement(models.Model):
         tracking=True,
     )
     date = fields.Date(
-        default=lambda self: self._context.get("date", fields.Date.context_today(self)),
+        default=lambda self: self.env.context.get(
+            "date", fields.Date.context_today(self)
+        ),
         required=True,
     )
 

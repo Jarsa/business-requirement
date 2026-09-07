@@ -41,11 +41,11 @@ class BusinessRequirementTest(BusinessRequirementTestBase):
         self.assertEqual(seq, res.name)
 
     def test_br_read_group(self):
-        self.read_group = self.env["business.requirement"].read_group(
-            [], ["state"], ["state"]
+        state, count = self.env["business.requirement"]._read_group(
+            [], ["state"], ["__count"]
         )[0]
-        self.assertTrue(self.read_group["state"])
-        self.assertTrue(self.read_group["state_count"])
+        self.assertTrue(state)
+        self.assertTrue(count)
 
     def test_get_portal_confirmation_action(self):
         self.portal_confirmation_action = self.br.get_portal_confirmation_action()
