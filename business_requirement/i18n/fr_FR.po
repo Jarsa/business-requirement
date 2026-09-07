@@ -527,7 +527,7 @@ msgstr ""
 "suivre les progrès, discuter sur les taches, lier des documents, etc ..."
 
 #. module: business_requirement
-#: model:ir.model.fields.selection,name:business_requirement.selection__business_requirement__kanban_state__on_hold
+#: model:ir.model.fields.selection,name:business_requirement.selection__business_requirement__kanban_state__blocked
 msgid "On Hold"
 msgstr "En suspens"
 

@@ -13,7 +13,6 @@ class BusinessRequirement(models.Model):
     _order = "name desc"
     _rec_names_search = ["name", "description"]
 
-    sequence = fields.Char(readonly=True, copy=False, index=True)
     name = fields.Char(readonly=True, copy=False)
     description = fields.Char(required=True)
     business_requirement = fields.Html(string="Customer Story")
@@ -87,7 +86,9 @@ class BusinessRequirement(models.Model):
     kanban_state = fields.Selection(
         selection=[
             ("normal", "In Progress"),
-            ("on_hold", "On Hold"),
+            # `blocked` is the key Odoo's state widget paints red; renaming it
+            # is what makes the field look like every other kanban state.
+            ("blocked", "On Hold"),
             ("done", "Ready for next stage"),
         ],
         tracking=True,
@@ -196,10 +197,39 @@ class BusinessRequirement(models.Model):
 class BusinessRequirementCategory(models.Model):
     _name = "business.requirement.category"
     _description = "Categories"
+    _parent_name = "parent_id"
+    _parent_store = True
+    _order = "complete_name"
 
     name = fields.Char(required=True)
+    complete_name = fields.Char(
+        compute="_compute_complete_name", recursive=True, store=True
+    )
     parent_id = fields.Many2one(
         comodel_name="business.requirement.category",
         string="Parent Category",
         ondelete="restrict",
+        index=True,
     )
+    parent_path = fields.Char(index=True)
+    child_ids = fields.One2many(
+        comodel_name="business.requirement.category",
+        inverse_name="parent_id",
+        string="Child Categories",
+    )
+    active = fields.Boolean(default=True)
+
+    @api.depends("name", "parent_id.complete_name")
+    def _compute_complete_name(self):
+        for category in self:
+            if category.parent_id:
+                category.complete_name = (
+                    f"{category.parent_id.complete_name} / {category.name}"
+                )
+            else:
+                category.complete_name = category.name
+
+    @api.depends("complete_name")
+    def _compute_display_name(self):
+        for category in self:
+            category.display_name = category.complete_name
